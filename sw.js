@@ -1,4 +1,4 @@
-const CACHE = "remind-me-v2";
+const CACHE = "remind-me-v3";
 const ASSETS = [
   "./",
   "./index.html",

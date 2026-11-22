@@ -210,12 +210,45 @@
     armTimers();
   }
 
+  function resetConfirmFields() {
+    var form = $("confirmForm");
+    if (form && form.reset) form.reset();
+    $("fieldTitle").value = "";
+    // Blank first so iOS Safari doesn’t keep showing the previous date/time.
+    $("fieldDate").value = "";
+    $("fieldTime").value = "";
+    $("fieldLead").value = "0";
+    $("fieldRecur").value = "none";
+  }
+
+  function resetDraftState() {
+    editingId = null;
+    lastFinal = "";
+    lastInterim = "";
+    wantListening = false;
+    finalizedThisTurn = true;
+    restartCount = 0;
+    clearSpeechTimers();
+    try { if (recognition) recognition.stop(); } catch (e) {}
+    if (typeof setListeningUI === "function") setListeningUI(false);
+    if (typeof exitKeyboardMicMode === "function") exitKeyboardMicMode();
+    $("typeInput").value = "";
+    var box = $("transcript");
+    box.textContent = "";
+    hide(box);
+    setStatus("");
+    resetConfirmFields();
+  }
+
   function openConfirm(draft, id) {
+    resetConfirmFields();
     editingId = id || null;
     $("confirmHeading").textContent = id ? "Edit reminder" : "Check this reminder";
     $("fieldTitle").value = draft.title || "";
-    $("fieldDate").value = draft.date;
-    $("fieldTime").value = draft.time;
+    $("fieldDate").value = "";
+    $("fieldTime").value = "";
+    $("fieldDate").value = draft.date || "";
+    $("fieldTime").value = draft.time || "";
     ensureLeadOption(draft.leadMinutes || 0);
     $("fieldLead").value = String(draft.leadMinutes || 0);
     $("fieldRecur").value = recurToValue(draft.recur);
@@ -225,7 +258,7 @@
 
   function closeConfirm() {
     hide($("confirmOverlay"));
-    editingId = null;
+    resetDraftState();
   }
 
   function saveFromForm(e) {
@@ -478,7 +511,8 @@
     clearSpeechTimers();
     try { if (recognition) recognition.stop(); } catch (e) {}
     setListeningUI(false);
-    var text = (lastFinal || lastInterim || $("typeInput").value || "").trim();
+    // Only use what this listen session heard — never a leftover text-box phrase.
+    var text = (lastFinal || lastInterim).trim();
     if (text) maybeOpenFromText(text, true);
     else if (reason !== "error") setStatus("I didn’t catch that. Try again, or use the keyboard mic.");
   }
@@ -876,6 +910,26 @@
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./sw.js").catch(function () {});
     }
+
+    window.RemindMeTest = {
+      getDraft: function () {
+        return {
+          typeInput: $("typeInput").value,
+          transcript: $("transcript").textContent,
+          transcriptHidden: $("transcript").classList.contains("hidden"),
+          title: $("fieldTitle").value,
+          date: $("fieldDate").value,
+          time: $("fieldTime").value,
+          lead: $("fieldLead").value,
+          recur: $("fieldRecur").value,
+          editingId: editingId,
+          lastFinal: lastFinal,
+          lastInterim: lastInterim,
+          keyboardMicMode: keyboardMicMode,
+          confirmOpen: !$("confirmOverlay").classList.contains("hidden")
+        };
+      }
+    };
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
