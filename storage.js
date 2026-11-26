@@ -1,6 +1,8 @@
 /* localStorage reminders, versioned. Works in the browser. */
 (function (root) {
-  var KEY = "voice-reminders";
+  var KEY_PREFIX = (typeof RemindMeConfig !== "undefined" && RemindMeConfig.STAGING) ? "rm-staging:" : "";
+  function storageKey(name) { return KEY_PREFIX + name; }
+  var KEY = storageKey("voice-reminders");
   var VERSION = 1;
 
   function uid() {
@@ -78,6 +80,8 @@
 
   var api = {
     KEY: KEY,
+    KEY_PREFIX: KEY_PREFIX,
+    storageKey: storageKey,
     VERSION: VERSION,
     uid: uid,
     empty: empty,

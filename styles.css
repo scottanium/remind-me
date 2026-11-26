@@ -484,3 +484,22 @@ input:focus, select:focus, textarea:focus {
   display: none !important;
 }
 .composer.keyboard-mode .keyboard-mic-btn { margin-top: 4px; }
+
+/* Staging-only banner. Hidden unless config.js sets STAGING=true. */
+.staging-banner {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  background: #f5b942;
+  color: #1a1408;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-align: center;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+body.is-staging {
+  padding-top: 0;
+}
